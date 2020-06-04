@@ -16,7 +16,7 @@ class BotDiscord(discord.Client):
     isChatEnable = True
 
     def __init__(self):
-        translator = Translator()         # Creating Translator
+        self.translator = Translator()         # Creating Translator
 
     def getDialogFlowAnswer(self,q:str):
         request = apiai.ApiAI(APIKEY).text_request()
@@ -74,7 +74,7 @@ class BotDiscord(discord.Client):
    
     def translate(self,q:str):
         if set("йцукенгшщзхъфывапролджэячсмитьбю").isdisjoint(q.lower()) == True:  #Fast lang checker
-            return translator.translate([q], dest='ru')
+            return self.translator.translate([q], dest='ru')
         return q
 
 
