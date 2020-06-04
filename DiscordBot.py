@@ -2,12 +2,20 @@ from googletrans import Translator
 import apiai,json,configparser, requests, discord # Import necessary libraries
 
 config = configparser.ConfigParser()        # Creating configs readers
-
 config.read("config.ini")                   # Read configs from files
 
-APIKEY = config["DialogFlow"]["api_key"]
-TOKEN = config["Discord"]["token"]          # Set Discord Token an DialogFlow apikey from files
-
+#Check config file
+if config.__len__() > 1:
+    APIKEY = config["DialogFlow"]["api_key"]
+    TOKEN = config["Discord"]["token"]          # Set Discord Token an DialogFlow apikey from files
+else:
+    dialogflowtoken = str(input("Введите dialogflowtoken: "))
+    discordtoken = str(input("Введите discordtoken: "))
+    configs = open("config.ini","w")            # Create config file
+    configs.write(f"[Discord]\ntoken={dialogflowtoken}\n[DialogFlow]\napi_key={discordtoken}") #Write changes to config file
+    configs.close()                             # Close config file
+    APIKEY = dialogflowtoken
+    TOKEN = discordtoken
 
 #Discord Bot class
 class BotDiscord(discord.Client):
@@ -19,11 +27,14 @@ class BotDiscord(discord.Client):
         self.translator = Translator()         # Creating Translator
 
     def getDialogFlowAnswer(self,q:str):
+
         request = apiai.ApiAI(APIKEY).text_request()
         request.lang = 'ru' 
         request.query = q
-        responseJson = json.loads(request.getresponse().read().decode('utf-8'))
-        response = responseJson['result']['fulfillment']['speech']
+
+        responseJson = json.loads(request.getresponse().read().decode('utf-8'))     # Get DialogFlow response
+        response = responseJson['result']['fulfillment']['speech']                  # Get speech from response
+        
         if response.__len__() > 0:
             return response
         else:
